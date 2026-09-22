@@ -98,7 +98,7 @@ class Scp:
 	def __download(self, src_file, dst_file) -> list:
 		script_dir = os.path.dirname(__file__)
 
-		if self.password:
+		if self.__password:
 			try :
 				output = subprocess.run(["bash", f"{script_dir}/scp/scp_pass_download.sh", self.__host, src_file, dst_file, self.__user, self.__password], capture_output=True, text=True, timeout=15)
 			except subprocess.TimeoutExpired:
