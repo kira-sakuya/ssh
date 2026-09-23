@@ -7,6 +7,7 @@ class Ssh:
 		self.__user = user
 		self.__password = password
 		self.__host = host
+		self.__script_dir = os.path.dirname(__file__)
 
 	def __ssh(self, cmd) -> list:
 		"""
@@ -18,9 +19,8 @@ class Ssh:
 		:rtype: list
 		"""
 
-		script_dir = os.path.dirname(__file__)
 		try :
-			output = subprocess.run(["bash", f"{script_dir}/ssh/ssh.sh", self.__user, self.__host, cmd], capture_output=True, text=True, timeout=15)
+			output = subprocess.run(["bash", f"{self.__script_dir}/ssh/ssh.sh", self.__user, self.__host, cmd], capture_output=True, text=True, timeout=15)
 		except subprocess.TimeoutExpired:
 			return "", 1
 		return output.stdout.strip(), output.returncode
@@ -35,9 +35,8 @@ class Ssh:
 		:rtype: list
 		"""
 
-		script_dir = os.path.dirname(__file__)
 		try :
-			output = subprocess.run(["bash", f"{script_dir}/ssh/ssh_pass.sh", self.__user, self.__host, self.__password, cmd], capture_output=True, text=True, timeout=15)
+			output = subprocess.run(["bash", f"{self.__script_dir}/ssh/ssh_pass.sh", self.__user, self.__host, self.__password, cmd], capture_output=True, text=True, timeout=15)
 		except subprocess.TimeoutExpired:
 			return "", 1
 		return output.stdout.strip(), output.returncode
@@ -68,29 +67,26 @@ class Ssh:
 		:rtype: list
 		"""
 
-		try:
-			return self.execute_cmd(cmd)
-		except:
-			return ("Reboot command sent", 0)
+		self.execute_cmd(cmd)
+		return "Reboot command sent", 0
 
 class Scp:
 	def __init__(self, user, host, password=None) -> None:
 		self.__user = user
 		self.__password = password
 		self.__host = host
+		self.__script_dir = os.path.dirname(__file__)
 
 	def __upload(self, src_file, dst_file) -> list:
-		script_dir = os.path.dirname(__file__)
-
 		if self.__password:
 			try :
-				output = subprocess.run(["bash", f"{script_dir}/scp/scp_pass_upload.sh", self.__host, src_file, dst_file, self.__user, self.__password], capture_output=True, text=True, timeout=15)
+				output = subprocess.run(["bash", f"{self.__script_dir}/scp/scp_pass_upload.sh", self.__host, src_file, dst_file, self.__user, self.__password], capture_output=True, text=True, timeout=15)
 			except subprocess.TimeoutExpired:
 				return "", 1
 			return output.stdout.strip(), output.returncode
 
 		try :
-			output = subprocess.run(["bash", f"{script_dir}/scp/scp_upload.sh", self.__host, src_file, dst_file, self.__user], capture_output=True, text=True, timeout=15)
+			output = subprocess.run(["bash", f"{self.__script_dir}/scp/scp_upload.sh", self.__host, src_file, dst_file, self.__user], capture_output=True, text=True, timeout=15)
 		except subprocess.TimeoutExpired:
 			return "", 1
 		return output.stdout.strip(), output.returncode
@@ -100,20 +96,20 @@ class Scp:
 
 		if self.__password:
 			try :
-				output = subprocess.run(["bash", f"{script_dir}/scp/scp_pass_download.sh", self.__host, src_file, dst_file, self.__user, self.__password], capture_output=True, text=True, timeout=15)
+				output = subprocess.run(["bash", f"{self.__script_dir}/scp/scp_pass_download.sh", self.__host, src_file, dst_file, self.__user, self.__password], capture_output=True, text=True, timeout=15)
 			except subprocess.TimeoutExpired:
 				return "", 1
 			return output.stdout.strip(), output.returncode
 
 		try :
-			output = subprocess.run(["bash", f"{script_dir}/scp/scp_download.sh", self.__host, src_file, dst_file, self.__user], capture_output=True, text=True, timeout=15)
+			output = subprocess.run(["bash", f"{self.__script_dir}/scp/scp_download.sh", self.__host, src_file, dst_file, self.__user], capture_output=True, text=True, timeout=15)
 		except subprocess.TimeoutExpired:
 			return "", 1
 		return output.stdout.strip(), output.returncode
 
 	def scp(self, up_dl, src_file, dst_file) -> list:
 		if up_dl not in ('upload', 'download'):
-			raise ValueError(f"src_file doit être 'upload' ou 'download', reçu : '{src_file}'")
+			raise ValueError(f"src_file doit être 'upload' ou 'download', reçu : '{up_dl}'")
 
 		if up_dl == 'upload':
 			return self.__upload(src_file=src_file, dst_file=dst_file)
